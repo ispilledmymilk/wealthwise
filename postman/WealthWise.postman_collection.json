@@ -1,0 +1,196 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-wealthwise-api",
+    "name": "WealthWise",
+    "description": "WealthWise API — import **WealthWise Local** environment, run Register (once) then Login; Login Tests tab sets `token` per README. Protected folders use Bearer {{token}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" },
+    { "key": "transaction_id", "value": "1" },
+    { "key": "alert_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@wealthwise.local\",\n  \"password\": \"ChangeMe123!\",\n  \"fullName\": \"Demo User\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/register"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.environment.set(\"token\", res.token);",
+                  "pm.collectionVariables.set(\"token\", res.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@wealthwise.local\",\n  \"password\": \"ChangeMe123!\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/login",
+            "description": "Tests script (README): `pm.environment.set(\"token\", res.token);` — select **WealthWise Local** environment. Also sets collection `token` as fallback."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "List transactions",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/api/transactions" },
+          "response": []
+        },
+        {
+          "name": "List transactions (month + category)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/transactions?month=2025-01&category=DINING"
+          },
+          "response": []
+        },
+        {
+          "name": "Create transaction",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 42.50,\n  \"category\": \"DINING\",\n  \"description\": \"Lunch\",\n  \"transactionDate\": \"2025-01-15\"\n}"
+            },
+            "url": "{{base_url}}/api/transactions"
+          },
+          "response": []
+        },
+        {
+          "name": "Update transaction",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50.00,\n  \"category\": \"DINING\",\n  \"description\": \"Lunch (updated)\",\n  \"transactionDate\": \"2025-01-15\"\n}"
+            },
+            "url": "{{base_url}}/api/transactions/{{transaction_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete transaction",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/api/transactions/{{transaction_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Monthly summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/transactions/summary?month=1&year=2025"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Budgets",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "List budgets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/budgets?month=1&year=2025"
+          },
+          "response": []
+        },
+        {
+          "name": "Set budget",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"DINING\",\n  \"monthlyLimit\": 300.00,\n  \"month\": 1,\n  \"year\": 2025\n}"
+            },
+            "url": "{{base_url}}/api/budgets"
+          },
+          "response": []
+        },
+        {
+          "name": "Budget status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/budgets/status?month=1&year=2025"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "List alerts",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/api/alerts" },
+          "response": []
+        },
+        {
+          "name": "Unread alerts",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/api/alerts/unread" },
+          "response": []
+        },
+        {
+          "name": "Mark alert read",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{base_url}}/api/alerts/{{alert_id}}/read"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
