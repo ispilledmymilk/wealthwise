@@ -1,0 +1,29 @@
+<h1 class="h3 mb-4">Alerts</h1>
+
+@if (errorMessage) {
+  <div class="alert alert-danger">{{ errorMessage }}</div>
+}
+
+<div class="list-group shadow-sm">
+  @for (a of alerts; track a.id) {
+    <div
+      class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between gap-2"
+      [class.opacity-50]="a.read"
+    >
+      <div>
+        <div class="fw-medium">{{ a.alertType }}</div>
+        <div class="small text-muted">{{ a.category }} · {{ a.createdAt | date : 'medium' }}</div>
+        <div class="mt-1">{{ a.message }}</div>
+      </div>
+      <div class="text-md-end">
+        @if (!a.read) {
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="markRead(a)">Mark read</button>
+        } @else {
+          <span class="badge text-bg-secondary">Read</span>
+        }
+      </div>
+    </div>
+  } @empty {
+    <div class="list-group-item text-muted">No alerts yet.</div>
+  }
+</div>

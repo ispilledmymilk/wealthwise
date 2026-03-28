@@ -1,0 +1,97 @@
+<h1 class="h3 mb-4">Budgets</h1>
+
+@if (errorMessage) {
+  <div class="alert alert-danger">{{ errorMessage }}</div>
+}
+
+<div [formGroup]="form">
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h2 class="h6 text-muted mb-3">Period</h2>
+      <div class="row g-2 align-items-end">
+        <div class="col-auto">
+          <label class="form-label small">Month</label>
+          <input type="number" min="1" max="12" class="form-control" formControlName="month" />
+        </div>
+        <div class="col-auto">
+          <label class="form-label small">Year</label>
+          <input type="number" class="form-control" formControlName="year" />
+        </div>
+        <div class="col-auto">
+          <button type="button" class="btn btn-outline-primary" (click)="applyPeriod()">Load period</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h2 class="h6 text-muted mb-3">Set monthly limit</h2>
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label small">Category</label>
+          <select class="form-select" formControlName="category">
+            @for (c of categories; track c) {
+              <option [value]="c">{{ c }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small">Monthly limit</label>
+          <input type="number" step="0.01" class="form-control" formControlName="monthlyLimit" />
+        </div>
+        <div class="col-md-2">
+          <button type="button" class="btn btn-primary w-100" (click)="submit()">Save budget</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (statuses.length > 0) {
+  <h2 class="h6 text-muted mb-3">Status</h2>
+  <div class="table-responsive card border-0 shadow-sm mb-4">
+    <table class="table mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Category</th>
+          <th class="text-end">Limit</th>
+          <th class="text-end">Spent</th>
+          <th class="text-end">Remaining</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (s of statuses; track s.category) {
+          <tr>
+            <td>{{ s.category }}</td>
+            <td class="text-end">{{ s.limit | currency }}</td>
+            <td class="text-end">{{ s.spent | currency }}</td>
+            <td class="text-end">{{ s.remaining | currency }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.text-bg-success]="s.status === 'ON_TRACK'"
+                [class.text-bg-warning]="s.status === 'WARNING'"
+                [class.text-bg-danger]="s.status === 'EXCEEDED'"
+                >{{ s.status }}</span
+              >
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (budgets.length > 0) {
+  <h2 class="h6 text-muted mb-3">Defined limits</h2>
+  <ul class="list-group shadow-sm">
+    @for (b of budgets; track b.id) {
+      <li class="list-group-item d-flex justify-content-between">
+        <span>{{ b.category }}</span>
+        <span class="text-muted">{{ b.monthlyLimit | currency }} / month</span>
+      </li>
+    }
+  </ul>
+}

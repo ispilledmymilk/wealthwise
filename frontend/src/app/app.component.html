@@ -13,11 +13,24 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="nav">
-      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+      <ul class="navbar-nav me-auto">
         @if (auth.isLoggedIn()) {
           <li class="nav-item">
-            <a class="nav-link" routerLink="/dashboard">Dashboard</a>
+            <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/transactions" routerLinkActive="active">Transactions</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/budgets" routerLinkActive="active">Budgets</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/alerts" routerLinkActive="active">Alerts</a>
+          </li>
+        }
+      </ul>
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+        @if (auth.isLoggedIn()) {
           <li class="nav-item">
             <button type="button" class="btn btn-outline-light btn-sm" (click)="logout()">Logout</button>
           </li>

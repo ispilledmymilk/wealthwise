@@ -1,0 +1,73 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">Transactions</h1>
+</div>
+
+@if (errorMessage) {
+  <div class="alert alert-danger">{{ errorMessage }}</div>
+}
+
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <h2 class="h6 text-muted mb-3">{{ editingId == null ? 'Add' : 'Edit' }} transaction</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="row g-3 align-items-end">
+      <div class="col-md-2">
+        <label class="form-label small">Amount</label>
+        <input type="number" step="0.01" class="form-control" formControlName="amount" />
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Category</label>
+        <select class="form-select" formControlName="category">
+          @for (c of categories; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small">Date</label>
+        <input type="date" class="form-control" formControlName="transactionDate" />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small">Description</label>
+        <input type="text" class="form-control" formControlName="description" />
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-grow-1">Save</button>
+        @if (editingId != null) {
+          <button type="button" class="btn btn-outline-secondary" (click)="cancelEdit()">Cancel</button>
+        }
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="table-responsive card border-0 shadow-sm">
+  <table class="table table-hover mb-0 align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Date</th>
+        <th>Description</th>
+        <th>Category</th>
+        <th class="text-end">Amount</th>
+        <th class="text-end" style="width: 140px">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (t of transactions; track t.id) {
+        <tr>
+          <td>{{ t.transactionDate | date }}</td>
+          <td>{{ t.description || '—' }}</td>
+          <td><span class="badge text-bg-secondary">{{ t.category }}</span></td>
+          <td class="text-end">{{ t.amount | currency }}</td>
+          <td class="text-end">
+            <button type="button" class="btn btn-sm btn-outline-primary me-1" (click)="startEdit(t)">Edit</button>
+            <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(t)">Delete</button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5" class="text-muted text-center py-4">No transactions yet.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

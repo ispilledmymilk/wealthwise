@@ -16,4 +16,19 @@ export const routes: Routes = [
     loadComponent: () => import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
     canActivate: [authGuard],
   },
+  {
+    path: 'transactions',
+    loadComponent: () => import('./features/transactions/transactions.component').then((m) => m.TransactionsComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'budgets',
+    loadComponent: () => import('./features/budgets/budgets.component').then((m) => m.BudgetsComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'alerts',
+    loadComponent: () => import('./features/alerts/alerts.component').then((m) => m.AlertsComponent),
+    canActivate: [authGuard],
+  },
 ];
