@@ -1,81 +1,140 @@
-<div class="mb-4">
-  <h1 class="h3">Dashboard</h1>
-  <p class="text-muted mb-0">Spending overview for {{ month }}/{{ year }}</p>
-</div>
+<div class="dashboard-container">
+  @if (loadError) {
+    <div class="alert alert-warning">{{ loadError }}</div>
+  }
 
-@if (loadError) {
-  <div class="alert alert-warning">{{ loadError }}</div>
-}
+  @if (unreadAlerts.length > 0) {
+    <div class="alert-banner mb-4">
+      @for (alert of unreadAlerts; track alert.id) {
+        <div class="alert-item alert py-2 mb-2" [ngClass]="alertClass(alert.alertType)">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          {{ alert.message }}
+        </div>
+      }
+    </div>
+  }
 
-@if (summary) {
+  @if (spendingSummary) {
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="stat-card card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <span class="label text-muted small d-block">Total spent</span>
+            <span class="value fs-5 fw-semibold">{{ spendingSummary.totalSpent | currency }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <span class="label text-muted small d-block">Transactions</span>
+            <span class="value fs-5 fw-semibold">{{ transactionCount }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <span class="label text-muted small d-block">Budgets on track</span>
+            <span class="value fs-5 fw-semibold">{{ budgetsOnTrack }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <span class="label text-muted small d-block">Active alerts</span>
+            <span class="value fs-5 fw-semibold">{{ unreadAlerts.length }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
   <div class="row g-3 mb-4">
-    <div class="col-md-4">
+    <div class="col-lg-6">
       <div class="card border-0 shadow-sm h-100">
         <div class="card-body">
-          <div class="text-muted small">Total spent (this month)</div>
-          <div class="fs-4 fw-semibold">{{ summary.totalSpent | number : '1.2-2' }}</div>
+          <h2 class="h6 text-muted mb-3">Spending by category</h2>
+          @if (spendingChartData.labels?.length) {
+            <div class="chart-wrap">
+              <canvas baseChart [data]="spendingChartData" [type]="'doughnut'"></canvas>
+            </div>
+          } @else {
+            <p class="text-muted small mb-0">No category spending this month yet.</p>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h2 class="h6 text-muted mb-3">Daily trend</h2>
+          @if (trendChartData.labels?.length) {
+            <div class="chart-wrap">
+              <canvas baseChart [data]="trendChartData" [type]="'line'"></canvas>
+            </div>
+          } @else {
+            <p class="text-muted small mb-0">Add transactions this month to see a trend.</p>
+          }
         </div>
       </div>
     </div>
   </div>
 
-  <h2 class="h5 mb-3">By category</h2>
-  <div class="table-responsive mb-5">
-    <table class="table table-sm align-middle">
-      <thead>
+  @if (budgetStatuses.length > 0) {
+    <h2 class="h5 mb-3">Budget status</h2>
+    <div class="row g-3 mb-4">
+      @for (budget of budgetStatuses; track budget.category) {
+        <div class="col-md-4">
+          <div class="budget-card card border-0 shadow-sm h-100" [ngClass]="budget.status.toLowerCase()">
+            <div class="card-body">
+              <span class="fw-medium d-block mb-2">{{ budget.category }}</span>
+              <div class="progress mb-2" style="height: 8px">
+                <div
+                  class="progress-bar"
+                  [class.bg-danger]="budget.status === 'EXCEEDED'"
+                  [class.bg-warning]="budget.status === 'WARNING'"
+                  [class.bg-success]="budget.status === 'ON_TRACK'"
+                  role="progressbar"
+                  [style.width.%]="budget.percentageUsed > 100 ? 100 : budget.percentageUsed"
+                ></div>
+              </div>
+              <span class="small text-muted">
+                {{ budget.spent | currency }} / {{ budget.limit | currency }}
+              </span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <h2 class="h5 mb-3">Recent transactions</h2>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle bg-white rounded shadow-sm">
+      <thead class="table-light">
         <tr>
+          <th>Date</th>
+          <th>Description</th>
           <th>Category</th>
           <th class="text-end">Amount</th>
         </tr>
       </thead>
       <tbody>
-        @for (cat of summary.byCategory | keyvalue; track cat.key) {
-          @if (cat.value > 0) {
-            <tr>
-              <td>{{ cat.key }}</td>
-              <td class="text-end">{{ cat.value | number : '1.2-2' }}</td>
-            </tr>
-          }
+        @for (tx of recentTransactions; track tx.id) {
+          <tr>
+            <td>{{ tx.transactionDate | date }}</td>
+            <td>{{ tx.description || '—' }}</td>
+            <td><span class="badge text-bg-secondary">{{ tx.category }}</span></td>
+            <td class="text-end">{{ tx.amount | currency }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" class="text-muted">No transactions this month yet.</td>
+          </tr>
         }
       </tbody>
     </table>
   </div>
-}
-
-@if (budgetStatuses.length > 0) {
-  <h2 class="h5 mb-3">Budget status</h2>
-  <div class="row g-3">
-    @for (b of budgetStatuses; track b.category) {
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-              <span class="fw-medium">{{ b.category }}</span>
-              <span
-                class="badge"
-                [class.bg-success]="b.status === 'ON_TRACK'"
-                [class.bg-warning]="b.status === 'WARNING'"
-                [class.bg-danger]="b.status === 'EXCEEDED'"
-                >{{ b.status }}</span
-              >
-            </div>
-            <div class="progress mt-2" style="height: 6px">
-              <div
-                class="progress-bar"
-                role="progressbar"
-                [style.width.%]="b.percentageUsed > 100 ? 100 : b.percentageUsed"
-              ></div>
-            </div>
-            <div class="small text-muted mt-2">
-              {{ b.spent | number : '1.2-2' }} / {{ b.limit | number : '1.2-2' }}
-            </div>
-          </div>
-        </div>
-      </div>
-    }
-  </div>
-}
-
-@if (!summary && !loadError) {
-  <p class="text-muted">Loading…</p>
-}
+</div>

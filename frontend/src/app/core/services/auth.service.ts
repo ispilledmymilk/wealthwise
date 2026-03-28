@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
-import { API_URL, TOKEN_KEY } from './api-url';
+import { API_URL, TOKEN_KEY } from '../api-url';
 
 export interface AuthResponse {
   token: string;
@@ -10,7 +10,7 @@ export interface AuthResponse {
   fullName: string;
 }
 
-export interface RegisterPayload {
+export interface RegisterRequest {
   email: string;
   password: string;
   fullName: string;
@@ -21,15 +21,17 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
 
+  private readonly authBase = `${API_URL}/api/auth`;
+
   login(email: string, password: string): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(`${API_URL}/api/auth/login`, { email, password })
+      .post<AuthResponse>(`${this.authBase}/login`, { email, password })
       .pipe(tap((res) => localStorage.setItem(TOKEN_KEY, res.token)));
   }
 
-  register(data: RegisterPayload): Observable<AuthResponse> {
+  register(data: RegisterRequest): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(`${API_URL}/api/auth/register`, data)
+      .post<AuthResponse>(`${this.authBase}/register`, data)
       .pipe(tap((res) => localStorage.setItem(TOKEN_KEY, res.token)));
   }
 
